@@ -1,0 +1,18 @@
+# 分析
+大小为k的小根堆他的顶就是在k个数中排第k大的，先用前k建堆，用后面的元素去试探顶，如果比顶大也是就是降序会在顶的前面，
+说明会影响顺序，即顶不是最后的值。于是淘汰顶，把新值放入重新调整堆即可。
+# 实现
+```import heapq
+class Solution:
+    def findKthLargest(self, nums: List[int], k: int) -> int:
+        # *********大小为k的小根堆他的顶就是在k个数中排第k大的**********
+        if k>len(nums):
+            raise Exception("输入错误")
+        heap_list = [] # 用一个list去存堆
+        for i in range(k): # 先把前k项建堆
+            heapq.heappush(heap_list,nums[i])
+        for i in range(k,len(nums)):
+            if nums[i]>heap_list[0]: # 如果比顶大也是就是降序会在顶的前面，说明会影响顺序，即顶不是最后的值
+                heapq.heapreplace(heap_list,nums[i])
+        return heap_list[0]
+```

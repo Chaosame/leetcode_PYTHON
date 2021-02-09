@@ -1,0 +1,50 @@
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+# 初版解法
+class Solution:
+    inorder_ = True
+    inorder = [] # 用于保存中序遍历
+    inorder_index = {} # 用于储存hash映射
+    def convertBST(self, root: TreeNode) -> TreeNode:
+        # bst中序遍历是一个递增数组,由于值各不相同用它建hash快速定位某个值的下标，然后把下标以后的全部累加起来换掉val
+        def inorder_walk(root):
+            if not root:
+                return
+            inorder_walk(root.left)
+            self.inorder.append(root.val)
+            inorder_walk(root.right)
+        if self.inorder_:
+            inorder_walk(root)
+            self.inorder_index = {self.inorder[i]:i for i in range(len(self.inorder))}
+            self.inorder_ = False
+        if not root:
+            return
+        root_index = self.inorder_index[root.val]
+        for i in range(root_index+1,len(self.inorder)):
+            root.val = root.val+self.inorder[i]
+        self.convertBST(root.left)
+        self.convertBST(root.right)
+        return root
+```
+
+# 优化
+```
+# 由于它是一棵二叉搜索树，满足二叉搜索树的性质 左小于根 右大于根 累加树定义为原树中大于该节点的val的所有val
+之和 我们知道bst的中序遍历是一个递增数列 从简单到复杂来考虑 对于最后一个元素 不需要加 对于倒数第二个只需要加
+最后一个 以此类推 我们需要从大到小去遍历树 那么需要反向的中序遍历
+class Solution:
+    val_sum = 0
+    def convertBST(self, root: TreeNode) -> TreeNode:
+        if not root:
+            return
+        self.convertBST(root.right)
+        self.val_sum += root.val
+        root.val =self.val_sum
+        self.convertBST(root.left)
+        return root
+```
