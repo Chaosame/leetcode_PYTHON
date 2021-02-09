@@ -1,0 +1,47 @@
+# 错误解法
+错因:左子树上的所有节点必须都小于根，右同理
+```
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def isValidBST(self, root: TreeNode) -> bool:
+        root_flag,left_flag,right_flag = True,False,False
+        if not root:
+            return True
+        if root.left: # 如果有左树
+           if root.left.val>=root.val:
+               root_flag = False
+        if root.right: # 如果有左树
+           if root.right.val<=root.val:
+               root_flag = False
+        left_flag = self.isValidBST(root.left)
+        right_flag = self.isValidBST(root.right)
+        return root_flag and left_flag and right_flag
+```
+# 思路
+使用bst中序遍历的性质，会得到一个单调增数列，如果在某步违反了这个约定，则说明不满足bst性质
+# 实现
+```python
+# Definition for a binary tree node.
+class TreeNode:
+     def __init__(self, val=0, left=None, right=None):
+         self.val = val
+         self.left = left
+         self.right = right
+class Solution:
+    inorder,last = [],-float('inf')
+    def isValidBST(self, root: TreeNode) -> bool:
+        if not root:
+            return True
+        left_flag = self.isValidBST(root.left)
+        if root.val <= self.last:
+            return False
+        self.last = root.val
+        right_flag = self.isValidBST(root.right)
+        return right_flag and left_flag
+        
+```
