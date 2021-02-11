@@ -1,0 +1,74 @@
+
+```
+import copy
+class Solution:
+    def solveNQueens(self, n: int) -> List[List[str]]:
+        # 思路 回溯 如何表示我们的选择列表呢？
+        def isValid(j,choose):
+            # j是第len(choose)行的第j列放置了棋子
+            for i in range(len(choose)):
+                if choose[i]==j or (len(choose)-i)==abs(j-choose[i]): # 已经不同行了,还要不同列,不同对角线,对角线可以用等腰三角性质 行差等于列差
+                    return False # 不满足约束 直接错
+            return True # 都不错才是对
+
+        def traceback(n,choose): 
+            # 用一维数组 他的下标加上值就可以表示出一个二维的坐标信息 choose[i]=k 表示在i行k列上放置棋子
+            if len(choose) == n: # 当选择列表中有n个时，说明我们找到所有皇后，返回
+                tmp_res.append(copy.copy(choose)) # 此时是一个可行解 加入
+                return 
+            for i in range(n):
+                if not isValid(i,choose): #检查一下选择的约束是否满足了
+                    continue
+                choose.append(i)     # 满足做选择
+                traceback(n,choose) # 进入下个节点
+                choose.pop() # 撤销选择
+
+
+        tmp_res = [] # 用来储存结果情况
+       
+        traceback(n,[]) # 运行完tmp_res是有结果的，还需要遍历tmp_res进行绘图
+        print(tmp_res)
+        res = [[['.']*n for _ in range(n)] for _ in range(len(tmp_res))]
+        for i in range(len(res)):
+            for j in range(n):
+                res[i][j][tmp_res[i][j]]='Q'
+                res[i][j]=''.join(res[i][j])
+        return res
+```
+
+# 优化
+```
+class Solution:
+    def solveNQueens(self, n: int) -> List[List[str]]:
+        # 思路 回溯 如何表示我们的选择列表呢？
+        def isValid(j,choose):
+            # j是第len(choose)行的第j列放置了棋子
+            for i in range(len(choose)):
+                if choose[i]==j or (len(choose)-i)==abs(j-choose[i]): # 已经不同行了,还要不同列,不同对角线,对角线可以用等腰三角性质 行差等于列差
+                    return False # 不满足约束 直接错
+            return True # 都不错才是对
+
+        def traceback(n,choose): 
+            # 用一维数组 他的下标加上值就可以表示出一个二维的坐标信息 choose[i]=k 表示在i行k列上放置棋子
+            if len(choose) == n: # 当选择列表中有n个时，说明我们找到所有皇后，返回
+                tmp_res.append(choose) # 此时是一个可行解 加入
+                return 
+            for i in range(n):
+                if not isValid(i,choose): #检查一下选择的约束是否满足了
+                    continue
+                traceback(n,choose+[i]) # 进入下个节点 撤销选择由于传了新的list进入原list就没变 也就不用回溯
+否则得copy一下再进res
+  
+
+
+        tmp_res = [] # 用来储存结果情况
+       
+        traceback(n,[]) # 运行完tmp_res是有结果的，还需要遍历tmp_res进行绘图
+        print(tmp_res)
+        res = [[['.']*n for _ in range(n)] for _ in range(len(tmp_res))]
+        for i in range(len(res)):
+            for j in range(n):
+                res[i][j][tmp_res[i][j]]='Q'
+                res[i][j]=''.join(res[i][j])
+        return res
+```

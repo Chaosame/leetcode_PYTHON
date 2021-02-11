@@ -1,0 +1,34 @@
+#实现
+```class Solution:
+    def subsets(self, nums: List[int]) -> List[List[int]]:
+        # dfs 深度优先 肯定是要回溯得
+
+        # C(m,n)
+        def dfs(n,s,choose):
+            if len(choose)==n:
+                # 说明到底了
+                res.append(choose[:])
+                return
+            # 做选择
+            for i in range(s,len(nums)):
+                dfs(n,i+1,choose+[nums[i]])
+
+        res = [[]] # 储存结果 一开始先把空集加入
+        for i in range(1,len(nums)+1):
+            dfs(i,0,[])
+        return res 
+```
+
+# 优化
+迭代法
+```
+class Solution:
+    def subsets(self, nums: List[int]) -> List[List[int]]:
+        # 考虑子集的性质
+        # 如果我们完成了对于an的遍历 对于an+1 由于数组中的数各不相同 在之前的解集中不可能存在an+1
+        # 又因为子集不要求顺序 且选an+1之前的情况我们已经全部知道了 这时候只要把an+1也选进去就好了
+        res = [[]]
+        for num in nums:
+            res = res + [item + [num] for item in res]
+        return res
+```

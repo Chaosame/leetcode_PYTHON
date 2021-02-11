@@ -1,0 +1,38 @@
+# 实现
+```class Solution:
+    def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:
+        # 回溯 约束条件 candidates[i] > target 终止条件 target=0
+
+        def dfs (choose,s,target):
+            if target ==0:
+                res.append(choose)
+            for i in range(s,len(candidates)):
+                if candidates[i]>target:
+                    continue
+                dfs(choose+[candidates[i]],i,target-candidates[i])
+        
+        res = []
+        dfs([],0,target)
+        return res
+```
+
+# 优化
+剪枝 这里的思想很明确当target小于一个小的数时 它也一定会小于一个更大的数 因此我们可以进行一个排序 从小往大搜索
+```
+class Solution:
+    def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:
+        # 回溯 约束条件 candidates[i] > target 终止条件 target=0
+
+        def dfs (choose,s,target):
+            if target ==0:
+                res.append(choose)
+            for i in range(s,len(candidates)):
+                if candidates[i]>target: # 小数已经比原来还大了 后面的都不用找了
+                    return
+                dfs(choose+[candidates[i]],i,target-candidates[i])
+        
+        res = []
+        candidates.sort()
+        dfs([],0,target)
+        return res
+```

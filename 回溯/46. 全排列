@@ -1,0 +1,68 @@
+# 思路
+这是一个回溯的基础问题体会这种和回溯树有关的思想 相进下个树节点得做选择 但是我们考察完下个节点 
+还得能回到原来的状态 去走原来的分支 因此需要撤销选择 体会这种思想，此外回溯的递归出口和约束条件
+往往需要我们考虑。
+# 实现
+```import copy
+class Solution:
+    res = [] # 用于返回所有的结果
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        self.res = [] # 执行前先清空
+        choose = [] # 记录选择
+        self.traceback(choose,nums)
+        return self.res
+    
+
+
+    def traceback(self,choose,choose_list):
+        if len(choose_list)==len(choose): # 已选和选择列表个数相同则返回
+            self.res.append(copy.copy(choose)) # 递归完成说明已经到了出口 也就是树底层 此时的选择列表就是要求的 python中list是引用 因此拷贝一份
+            return
+        for i in range(len(choose_list)):
+            if choose_list[i] in choose: # 约束条件
+                continue
+            choose.append(choose_list[i]) # 做选择
+            self.traceback(choose,choose_list) # 递归去做下一次选择
+            choose.pop() # 取消选择
+```
+# 优化
+```
+import copy
+class Solution:
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        def traceback(choose,choose_list):
+            if len(choose_list)==len(choose): # 已选和选择列表个数相同则返回
+                res.append(copy.copy(choose)) # 递归完成说明已经到了出口 也就是树底层 此时的选择列表就是要求的 python中list是引用 因此拷贝一份
+                return
+            for i in range(len(choose_list)):
+                if choose_list[i] in choose: # 约束条件
+                    continue
+                choose.append(choose_list[i]) # 做选择
+                traceback(choose,choose_list) # 递归去做下一次选择
+                choose.pop() # 取消选择
+            
+        res = [] # 执行前先清空
+        traceback([],nums)
+        return res
+    
+```
+
+# 再优化
+python 中对于列表传的是值 但是是相当于数组的开始地址 如果我们在函数的内部去改列表 原列表中的值也会
+变化 用 +法可以把一个合成的新的list传入 这样就不改变原来列表的值 省去了回溯撤销的过程
+```class Solution:
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        def traceback(choose,choose_list):
+            if len(choose_list)==len(choose): # 已选和选择列表个数相同则返回
+                res.append(choose) # 递归完成说明已经到了出口 也就是树底层 此时的选择列表就是要求的 python中list是引用 因此拷贝一份
+                return
+            for i in range(len(choose_list)):
+                if choose_list[i] in choose: # 约束条件
+                    continue
+                traceback(choose+[choose_list[i]],choose_list) # 递归去做下一次选择
+
+            
+        res = [] # 执行前先清空
+        traceback([],nums)
+        return res
+```

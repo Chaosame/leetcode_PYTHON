@@ -1,0 +1,61 @@
+# 初版实现
+```
+class Solution:
+    def generateParenthesis(self, n: int) -> List[str]:
+        # 第一思路是找到所有的排列 然后筛选可行解
+        # 品一下什么是有效的括号 括号是成对的 括号的放置有两种情况 一是放在一对括号的里面 二是放在一对
+        # 括号的 后这样过于复杂了
+        # 合法括号的性质 一是整体来看左括号等于右括号 二是对于任意的n (n<length) 从0-n位置上 左括号的数量总是要大于等于右括号的 这非常易懂 因为左括号基本都会在左边 从左边开始数 一定是左括号要多
+        # 这就是我们的俩个约束条件了 用它进行剪枝
+        # 对于n对 括号 总长度为2n 当长度为2n时终止
+        def dfs(left_num,right_num,s,cur):
+            if len(cur) == 2*n: # 长度足够且符合俩条性质是解
+                cur = ''.join(cur)
+                res.append(cur)
+                return
+            for i in range(s,2*n):
+                for item in ['(',')']:
+                    if item == '(' and left_num +1>=right_num and left_num+1<=n:
+                        dfs(left_num+1,right_num,i+1,cur+['('])
+                    elif item == ')' and left_num>=right_num+1 and right_num+1<=n:
+                        dfs(left_num,right_num+1,i+1,cur+[')'])
+                    continue # 都不满足说明此时选择的括号不对
+                    
+        res= []
+        dfs(0,0,0,[])
+        return res
+```
+# 反思
+时间非常的长 为什么？ 时间的花费来自 for i in range(s,2*n) 为什么会出现这种错误
+因为没有理解这一循环的本质 它的意思是指在候选列表中进行尝试 已经选择的串的长度是由递归深度控制的 如果我们用它对
+长度循环等于是进行非常多的重复运算 比如i=1 时 他会计算 i=2 i=3 实际上 i=3 在i =2 中已经被计算了
+而对于候选列表 这个循环是必要的 因为我们需要跳过一些选择 i=2 是选了2 i=3 是选了3没选2 需要从树的角度理解它
+不要一味的套模板
+# 优化
+```
+class Solution:
+    def generateParenthesis(self, n: int) -> List[str]:
+        # 第一思路是找到所有的排列 然后筛选可行解
+        # 品一下什么是有效的括号 括号是成对的 括号的放置有两种情况 一是放在一对括号的里面 二是放在一对
+        # 括号的 后这样过于复杂了
+        # 合法括号的性质 一是整体来看左括号等于右括号 二是对于任意的n (n<length) 从0-n位置上 左括号的数量总是要大于等于右括号的 这非常易懂 因为左括号基本都会在左边 从左边开始数 一定是左括号要多
+        # 这就是我们的俩个约束条件了 用它进行剪枝
+        # 对于n对 括号 总长度为2n 当长度为2n时终止
+        def dfs(left_num,right_num,s,cur):
+            # 不合法情况
+            if right_num>left_num:
+                return
+            if right_num>n or left_num>n:
+                return
+            if len(cur) == 2*n: # 长度足够且符合俩条性质是解
+                res.append(cur)
+                return
+
+            dfs(left_num+1,right_num,left_num+right_num+1,cur+'(') # 选左试试
+            dfs(left_num,right_num+1,left_num+right_num+1,cur+')') # 选右试试
+
+                    
+        res= []
+        dfs(0,0,0,'')
+        return res
+```

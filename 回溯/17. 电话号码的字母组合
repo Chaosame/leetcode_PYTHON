@@ -1,0 +1,38 @@
+# 初版实现
+```
+    def letterCombinations(self, digits: str) -> List[str]:
+        num_map={2:['a','b','c'],3:['d','e','f'],4:['g','h','i'],5:['j','k','l'],6:['m','n','o'],7:['p','q','r','s'],8:['t','u','v'],9:['w','x','y','z']}
+        def dfs(choose,s):
+            if len(choose)==len(digits):
+                zm_str = ''.join(choose)
+                if zm_str: # 会把空串放入需要注意
+                    res.append(''.join(choose))
+                return
+            for i in range(s,len(digits)):
+                zm_list=num_map[int(digits[i])]
+                for j in range(len(zm_list)):
+                    dfs(choose+[zm_list[j]],i+1)
+        res=[]
+        digits = list(digits)
+        dfs([],0)
+        return res
+```
+
+# 优化
+思维开阔一些 想到子集的问题解 可以采用类似的递归 子问题是排除掉digits最后一个的情况 对于这个子问题 在它的每个解
+后加入新的数字对应的字母即可 但是这种特别容易出错 要把握字符串和列表的转换
+```
+class Solution:
+    def letterCombinations(self, digits: str) -> List[str]:
+        if not digits: # 空串处理掉
+            return []
+        num_map={2:'abc',3:'def',4:'ghi',5:'jkl',6:'mno',7:'pqrs',8:'tuv',9:'wxyz'}
+        if len(digits) == 1:
+            return list(num_map[int(digits)])
+        last_zm_list =  num_map[int(digits[-1])]
+        pre = self.letterCombinations(digits[:-1])
+        res =[]
+        for i in range(len(last_zm_list)):
+            res = res+[item+last_zm_list[i] for item in pre]
+        return res
+```
