@@ -1,0 +1,125 @@
+# 初版实现
+```
+class Solution:
+    def exist(self, board: List[List[str]], word: str) -> bool:
+        # 回溯
+        # 终点条件是cur的长度等于word了
+        # 约束条件在于 cur[i]=word[i]
+        def dfs(cur,used,s,x_cur,y_cur): #x_cur y_cur 为现在的坐标位置
+            flag = False
+            if len(cur)==len(word): #满足条件直接True
+                return True
+            if (x_cur,y_cur) in used:
+                return False
+            if x_cur>x_len-1 or x_cur<0:
+                return False
+            if y_cur>y_len-1 or y_cur<0:
+                return False
+            if board[x_cur][y_cur]==word[s]:
+                flag_up=dfs(cur+word[s],used+[(x_cur,y_cur)],s+1,x_cur,y_cur-1)
+                flag_down=dfs(cur+word[s],used+[(x_cur,y_cur)],s+1,x_cur,y_cur+1)
+                flag_left=dfs(cur+word[s],used+[(x_cur,y_cur)],s+1,x_cur-1,y_cur)
+                flag_right=dfs(cur+word[s],used+[(x_cur,y_cur)],s+1,x_cur+1,y_cur)
+                flag = flag_up or flag_down or flag_left or flag_right
+            return flag
+
+
+        x_len = len(board)
+        y_len = len(board[0])
+        res= False
+        for i in range(x_len):
+            for j in range(y_len):
+                if dfs("",[],0,i,j):
+                    return True
+        return False
+```
+# 反思
+运行发现超时 说明我们需要剪枝 怎么剪枝 可能的原因就是在列表中找元组导致时间超过
+# 优化实现
+```
+class Solution:
+    def exist(self, board: List[List[str]], word: str) -> bool:
+        # 回溯
+        # 终点条件是cur的长度等于word了
+        # 约束条件在于 cur[i]=word[i]
+        def dfs(cur,marked,s,x_cur,y_cur): #x_cur y_cur 为现在的坐标位置
+            # 记录走法
+            method = [(0,1),(0,-1),(1,0),(-1,0)]
+            if len(cur)==len(word): #满足条件直接True
+                return True
+            if x_cur<0 or x_cur>x_len-1: # 先判断x,y的合理性防止越界
+                return False
+            if y_cur<0 or y_cur>y_len-1:
+                return False
+            if marked[x_cur][y_cur]:
+                return False
+            if board[x_cur][y_cur]==word[s]:
+                marked[x_cur][y_cur]=1
+                for item in method:
+                    if dfs(cur+word[s],marked,s+1,x_cur+item[0],y_cur+item[1]): # 最后一个实际上是无法选则的
+                            return True
+                marked[x_cur][y_cur]=0
+            return False
+
+
+        x_len = len(board)
+        y_len = len(board[0])
+        marked = [[0 for _ in range(y_len)] for _ in range(x_len)]
+        for i in range(x_len):
+            for j in range(y_len):
+                if dfs("",marked,0,i,j):
+                    return True
+        return False
+        
+```
+
+# 再优化 
+如果 某个盘中某个字母的数量还没有word中的多，那么一定无法实现,这些都剪掉,其次我们可以用一个tmp暂存棋盘上的数
+把棋盘上一个数换成特殊数 这样就节省了空间 但是如果是不允许修改board的情况就不能这样做 因为python对列表是把头的
+地址传入 改里面的东西的东西等于改内存 原list是会变的
+```
+class Solution:
+    def exist(self, board: List[List[str]], word: str) -> bool:
+        # 回溯
+        # 终点条件是cur的长度等于word了
+        # 约束条件在于 cur[i]=word[i]
+        def dfs(cur,s,x_cur,y_cur): #x_cur y_cur 为现在的坐标位置
+            # 记录走法
+            method = [(0,1),(0,-1),(1,0),(-1,0)]
+            if len(cur)==len(word): #满足条件直接True
+                return True
+            if x_cur<0 or x_cur>x_len-1:
+                return False
+            if y_cur<0 or y_cur>y_len-1:
+                return False
+            if board[x_cur][y_cur]=='*':
+                return False
+            if board[x_cur][y_cur]==word[s]:
+                tmp,board[x_cur][y_cur]=board[x_cur][y_cur],'*'
+                for item in method:
+                    if dfs(cur+word[s],s+1,x_cur+item[0],y_cur+item[1]):
+                            return True
+                board[x_cur][y_cur]=tmp
+            return False
+
+
+        x_len = len(board)
+        y_len = len(board[0])
+        # marked = [[0 for _ in range(y_len)] for _ in range(x_len)]
+        b = []
+        for item in board:
+            b= b+item
+
+        word_count = Counter(word)
+        board_count = Counter(b)
+        for k,v in word_count.items():
+            if not board_count.get(k):
+                return False
+            elif v>board_count.get(k):
+                return False
+        for i in range(x_len):
+            for j in range(y_len):
+                if dfs("",0,i,j):
+                    return True
+        return False
+```
