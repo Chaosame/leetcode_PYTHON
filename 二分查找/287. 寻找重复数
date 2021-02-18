@@ -1,0 +1,30 @@
+# 思路
+数组的长度是n+1  范围为1-n  重复为唯一解  
+用二分的思想去考虑  假设一个数 target  
+如果 数组中小于等于target的数比target本身还大 这说明 1-target中存在重复
+查找范围变为 left-target 
+如果小于等于 target 说明  target前面没有重复 查找范围变成  target+1-right
+当left==right时 查找完成 因此有以下代码
+# 实现
+```
+class Solution:
+    def findDuplicate(self, nums: List[int]) -> int:
+        nums_len = len(nums) # n+1
+        # 整个搜索空间是 [1,n]
+        left = 1
+        right = nums_len-1 # 左闭右闭
+        while (right>left):# 最后的单独数由题意一定是了
+            target = left+(right-left)//2 # 先选范围中点分布可能比较均匀
+            cnt = 0 # 记录小于等于target的个数
+            for i  in range(nums_len):
+                if nums[i]<=target:
+                    cnt+=1
+                    if cnt>target: # 剪枝 发现小于等于target的数比target-1多即可跳出 否则继续
+                        break
+            if cnt<=target: # 说明应当在 [target,right]的区间搜
+                left = target+1
+            elif cnt>target: # [left,target]
+                right = target
+        return left
+
+```

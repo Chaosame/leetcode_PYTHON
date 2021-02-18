@@ -1,0 +1,68 @@
+# 思路
+![题目.png](https://upload-images.jianshu.io/upload_images/20425476-285907c3ef11dd51.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![题目.png](https://upload-images.jianshu.io/upload_images/20425476-839df9176d4449a1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+dp肯定是可以想到的
+dp[i]表示以序号i元素结尾的最长上升子序列
+状态转移 
+    dp[i] = dp[k] +1 (任意nums[k] <nums[i] )
+时间复杂显然是O(n^2)
+# 实现
+```
+class Solution:
+    def lengthOfLIS(self, nums: List[int]) -> int: # 没有空数组
+        max_len = 1
+        nums_len = len(nums)
+        dp = [1] * nums_len  # dp[i] 表示包含序号i元素的最长上升子序列的长度
+        for i in range(1,nums_len):
+            for j in range(i):
+                if nums[j]<nums[i]:
+                    dp[i] = max(dp[i],dp[j]+1)
+            max_len = max(max_len,dp[i])
+        return max_len
+        
+```
+
+# 优化
+dp完成后 另一个思路 贪心 我们希望这个序列的每一项都增加的最慢 这样就会最长
+那么我们得维护一个数组来记录这其中得每一个元素
+递推关系是 如果一个元素比这个数组中任何一个都大 那么直接放最后 这个数组就变长了
+如果不是比任何一个数大那么根据贪心 我们想把第一个比它大的数换成它
+dp定义为dp[i]=k 表示长度为i的上升子序列的末尾的最小值
+那么我们可以不严格把第一个比他大的换掉 只需要把第一个比它小的后面的那个元素换掉即可 这恰好是二分找满足条件的最小
+由于贪心 当我们的dp对于nums上的单调性被证明后 dp的长度就是最长上升子序列的长度了 因为我们遍历完整个数组
+上升子序列的长度没法增加了 说明是最大值
+```
+class Solution:
+    def lengthOfLIS(self, nums: List[int]) -> int: # 没有空数组
+        # dp完成后 另一个思路 贪心 我们希望这个序列的每一项都增加的最慢 这样就会最长
+        # 那么我们得维护一个数组来记录这其中得每一个元素
+        # 递推关系是 如果一个元素比这个数组中任何一个都大 那么直接放最后 这个数组就变长了
+        # 如果不是比任何一个数大那么根据贪心 我们想把第一个比它大的数换成它
+        # dp定义为dp[i]=k 表示长度为i的上升子序列的末尾的最小值
+        # 那么我们可以不严格把第一个比他大的换掉 只需要把第一个比它小的后面的那个元素换掉即可
+
+        def bi_search(dp,num):
+            left = 0 
+            right = len(dp)-1 # 左闭右闭
+            while(left<=right):
+                mid = left+(right-left)//2
+                if (dp[mid]<num):
+                    left = mid+1
+                elif (dp[mid]>num):
+                    right = mid-1
+                elif dp[mid]==num:
+                    return
+            dp[left] = num
+            return
+
+        dp = [] # 初始为空
+        nums_len = len(nums)
+        for i in range(nums_len):
+            if not dp or dp[-1]<nums[i]:
+                dp.append(nums[i])
+            else:
+                # 二分查找 然后替换
+                bi_search(dp,nums[i])
+        return len(dp)
+    
+```
