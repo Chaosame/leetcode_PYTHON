@@ -1,0 +1,32 @@
+![image.png](https://upload-images.jianshu.io/upload_images/20425476-f8cdd4d0e061a158.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![image.png](https://upload-images.jianshu.io/upload_images/20425476-672447a00daeaa8c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+# 思路
+题目给了一个升序数组(可空),也就是让我们从这个数组中找到所有的target的位置用一个下界上界来确定，因为有序，具有单调性，很容易想到二分查找的办法
+那么怎么找呢？用二分查找先找下界，再找上界，一共两次，最后我们取下界位置或者上界位置的一个元素看看是不是要找的target即可，这一步是O(1),那么整个算法时间复杂度为O(logn)
+# 实现
+```
+class Solution:
+    def searchRange(self, nums: List[int], target: int) -> List[int]:
+        # 两次二分查找 分别找到上界下界即可
+        if not nums:
+            return [-1,-1]
+        nums_len = len(nums)
+        left1,left2 = 0,0
+        right1,right2 = nums_len-1,nums_len-1 # 左闭右闭
+        while left1<=right1:
+            mid = left1+(right1-left1)//2
+            if nums[mid]<target:
+                left1=mid+1
+            elif nums[mid]>=target:
+                right1=mid-1
+        while left2<=right2:
+            mid =left2+(right2-left2)//2
+            if nums[mid]<=target:
+                left2=mid+1
+            elif nums[mid]>target:
+                right2=mid-1
+        if left1<nums_len and right2<nums_len and nums[left1]==target: # 处理好越界
+            return [left1,right2]
+        else:
+            return [-1,-1]
+```
