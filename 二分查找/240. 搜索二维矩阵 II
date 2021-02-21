@@ -1,0 +1,87 @@
+![image.png](https://upload-images.jianshu.io/upload_images/20425476-42cecc66d7c98ff6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![image.png](https://upload-images.jianshu.io/upload_images/20425476-57547506a7ec3c29.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![image.png](https://upload-images.jianshu.io/upload_images/20425476-9b3623825031f6a2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+# 思路
+由行列有序可以知道这是一个二分的问题，并且不会有空矩阵。最容易想到的思想是一行一行的进行二分，这里可以进行一个剪枝，就是当target落入这个行的范围[row[0],row[-1]]才二分去找否则直接走
+# 实现
+```
+class Solution:
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        # 遍历行然后对内二分，剪枝
+        m = len(matrix)
+        n = len(matrix[0])
+        # 如何二分？对于某一行 只有在tar落在[matrix[i][0],matrix[i][-1]] 之间才可以二分 对这个区间使用普通二分
+        def bisearch(row,target): # 定义一个普通二分
+            lc,rc=0,n-1 # 双闭
+            while(lc<=rc):
+                mid = lc+(rc-lc)//2
+                if row[mid]==target:
+                    return mid
+                if row[mid]<target:
+                    lc= mid+1
+                elif row[mid]>target:
+                    rc=mid-1
+            return -1
+        
+        # 对行数进行二分
+        for i in range(m):
+            if target>=matrix[i][0] and target<=matrix[i][-1]:
+                res=bisearch(matrix[i],target)
+                if res>=0:
+                    return True
+        return False
+```
+# 反思
+这种解法显然没有利用到行递增的条件，肯定不是最优解,可以优化的地方比如我们不按行去一行一行的二分，而是使用对角线进行二分，如果比对角线上的元素大，我们去搜对角线所在的行或者列的右或者下部分，这样每次搜索的子问题大小实际上是比上面那种小的，时间复杂度为O((lg(n!))
+# 优化
+注意矩阵的四个端点有什么特点 左上角是最小值 有下角是最大值 右上角就非常特殊了，如果我们从右上角出发，向左走值比它小，向右值比它大，到一个新位置我们可以看做是原矩阵减去一行或者一列得到的新矩阵的右上角，例如:从原右上往下一步，相当于把原矩阵剪掉第一行得到的新矩阵的右上角。这样每次要么剪掉一行要么剪掉一列 O(m+n)就能完成搜索。
+# 实现
+```
+class Solution:
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        m = len(matrix)
+        n = len(matrix[0])
+        r = 0
+        c = n-1
+        while(r<m and c>=0):
+            if target == matrix[r][c]:
+                return True
+            elif target < matrix[r][c]:
+                c -= 1
+            elif target > matrix[r][c]:
+                r += 1
+        return False
+```
+# 再解
+分治, 通过对原矩阵进行分割递归得到 属于分治法 沿着行的中线去查找第一个 使得matrix[row-1][mid]<target<matrix[row][mid] 的row值 如果找到相等的直接就返回了 有俩种特殊情况 第一个值就大于target和直到最后一个值都小于target，也可以归于一并处理
+# 实现
+```
+class Solution:
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        def find_target(matrix,up,down,left,right):   
+        # 通过对原矩阵进行分割递归得到 属于分治法 沿着行的中线去查找第一个 使得matrix[row-1][mid]<target<matrix[row][mid] 的row值 如果找到相等的直接就返回了 有俩种特殊情况 第一个值就大于target和直到最后一个值都小于target，也可以归于一并处理
+            # 处理基本情况
+            if left>right or up>down:
+                return False
+            if target<matrix[up][left] or target>matrix[down][right]:
+                return False
+
+            # 找第一个使得matrix[row-1][mid]<target<matrix[row][mid]的row
+            mid = left+(right-left)//2
+            c_row = up
+            for i in range(up,down+1): # 搜索up-down空间
+                if target == matrix[i][mid]:
+                    # print('找到了！')
+                    return True
+                elif target>matrix[i][mid]:
+                    c_row = i+1
+            # 按row进行一个分割
+            # print('右上:'+str(find_target(matrix,up,c_row-1,mid+1,right)))
+            # print('左下:'+str(find_target(matrix,c_row,down,left,mid)))
+            return find_target(matrix,up,c_row-1,mid+1,right) or find_target(matrix,c_row,down,left,mid)
+
+        m = len(matrix)
+        n = len(matrix[0])
+        return find_target(matrix,0,m-1,0,n-1)
+      
+```
