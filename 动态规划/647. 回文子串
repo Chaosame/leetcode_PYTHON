@@ -1,0 +1,80 @@
+# 思路
+先写个暴力 对所有的左右边界进行枚举 时间复杂度O(n^3)
+```
+class Solution:
+    def countSubstrings(self, s: str) -> int:
+        # 计数问题 
+        # 1.定义状态 dp[i][j]=k表示包含i到j元素的回文串的个数 左闭右闭
+        # 2.转移方程 如果固定i dp[i][j] = dp[i][j-1]+dp[j][j]
+
+    
+        # 先写个暴力
+        def judge(i,j):
+            while(j>=i):
+                if not s[i]==s[j]:
+                    return False
+                i+=1
+                j-=1
+            return True
+
+        s_len = len(s)
+        res = 0
+        for i in range(s_len):
+            for j in range(i,s_len):
+                if judge(i,j):
+                    res+=1
+        return res
+
+```
+# 反思
+超时 暴力很明显的一点是重叠的子问题太多了，有些是回文串的我们已经判断过了，明显具有重叠子问题
+# 优化
+dp！ 三个步骤 定义状态 转移方程 基本情况 
+1.定义状态：由暴力法我们发现 重叠的子问题是子串是否是回文串
+那么我们定义状态为 dp[i][j]表示 i,j段的串是否是回文串 是则是1 不是则为0
+2.状态转移：对于一个dp[i][j] 如果str[i]!=str[j] 直接是false 如果相等则需讨论:
+如果 i==j:单个字符肯定是回文的
+如果 i+1==j:说明由俩个相同字符组成也是回文的
+除以上俩种：规约成子问题 dp[i+1][j-1]是不是回文的
+3.遍历方向：为什么需要考虑遍历方向？ 因为我们的状态的转移不是常规的[i-1][j-1] 而是 [i+1][j-1]
+      dp表如下 
+                   i,j-1         i,j
+                  i+1,j-1        i+1,j+1
+可以发现是从坐下推右上，并且我们假定右边界大于等于左边界 实际上只有dp表的上三角区域是有效的
+4.基本情况：由2知i==j时都是true 即对角线上的都是True
+至此 dp解法成立
+# 实现
+```
+class Solution:
+    def countSubstrings(self, s: str) -> int:
+        # 计数问题 
+        # 1.定义状态 dp[i][j]=1 or 0 表示包含i到j元素的左闭右闭串是否为回文串 是1 否0
+        # 2.转移方程 如果固定i dp[i][j] = dp[i][j-1]+dp[j][j] 
+        # 状态转移：对于一个dp[i][j] 如果str[i]!=str[j] 直接是false 如果相等则需讨论:
+        # 如果 i==j:单个字符肯定是回文的
+        # 如果 i+1==j:说明由俩个相同字符组成也是回文的
+        # 除以上俩种：规约成子问题 dp[i+1][j-1]是不是回文的
+        s_len = len(s)
+        ans =0
+        dp = [[0]*s_len for _ in range(s_len)]
+        
+        # # 基本情况
+        # for i in range(s_len):
+        #     dp[i][i]=1
+        # print(dp)
+        # 状态转移
+        for i in range(s_len-1,-1,-1): # i 从大往小
+            # print(i)
+            for j in range(i,s_len): # j 从小往大
+                if s[i]==s[j]:
+                    if j-i<=1: # 处理单个和俩个的情况
+                        dp[i][j] = 1
+                        ans+=1
+                    else:
+                        dp[i][j]=dp[i+1][j-1]
+                        if dp[i][j]==1:
+                            ans+=1
+                else:
+                    dp[i][j]=0
+        return ans
+```
