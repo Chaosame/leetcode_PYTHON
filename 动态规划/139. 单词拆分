@@ -1,0 +1,39 @@
+![image.png](https://upload-images.jianshu.io/upload_images/20425476-baff5a6fd2f05463.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![image.png](https://upload-images.jianshu.io/upload_images/20425476-e2ab5e26c1f8916a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+# 思考
+这题有点类似回文子串的题 肯定是得双指针的 dp[i][j]=1表示s下标i到下标j代表的字串可以被表示为单词，为0反之，那么如果dp[0][len(s)-1]=True就说明s整个可以表示为单词组
+这样做因为不知道一个单词会有多长 需要从之前的地方遍历过来
+dp[i][j] = max(dp[i][k] and s[k+1]-s[j] in dict) 对于所有的0<=k<j 
+或者考虑剪枝 先遍历一遍dict看看最短单词长度和最长单词长度分别是多少 然后根据这个区间 去遍历之前的dp数组
+# 实现
+```
+class Solution:
+    def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+        #这题有点类似回文子串的题 肯定是得双指针的 dp[i]=1表示s下标0到下标i-1代表的字串可以被表示为单词，为0反之，那么如果dp[len(s)-1]=True就说明s整个可以表示为单词组
+        #这样做因为不知道一个单词会有多长 需要枚举分界点
+        #dp[i] = max(dp[k] and s[k+1]-s[j] in dict) 对于所有的0<=k<j 
+        #或者考虑剪枝 先遍历一遍dict看看最短单词长度和最长单词长度分别是多少 然后根据这个区间 去遍历之前的dp数组
+        # 不能相信题目的非空
+        if not s or not wordDict:
+            return False
+        s_len = len(s)
+        # 遍历 worddict 求出单词的最小长和最大长
+        word_min_len,word_max_len = len(wordDict[0]),len(wordDict[0])
+    
+        for item in wordDict:
+            if len(item)<word_min_len:
+                word_min_len = len(item)
+            if len(item)>word_max_len:
+                word_max_len =len(item)
+        
+        dp = [False]*(s_len+1)
+        dp[0]=True
+        for i in range(1,s_len+1):
+            for j in range(0,i):
+                if i-j<word_min_len or i-j>word_max_len:
+                    dp[i]=False or dp[i]
+                    continue
+                dp[i] = dp[i] or (dp[j] and s[j:i] in wordDict)
+        return dp[s_len]
+
+```
