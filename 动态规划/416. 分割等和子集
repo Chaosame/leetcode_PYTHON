@@ -1,0 +1,88 @@
+![image.png](https://upload-images.jianshu.io/upload_images/20425476-bc1b854d2412e327.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+# 思考
+首先可以把整个数组的和求出来nums_sum 我们想，俩个数组的和相等 也就是说每一个的和是整个数组总和的一半 那就只用考察能否选择一个子数组使得他里面所有元素的和是1/2*nums_sum即可 这个问题就转化为一个0/1背包问题
+# 实现
+```
+class Solution:
+    def canPartition(self, nums: List[int]) -> bool:
+        #首先可以把整个数组的和求出来nums_sum 我们想，俩个数组的和相等 也就是说每一个的和是整个数组总和的一半 那就只用考察能否选择一个子数组使得他里面所有元素的和是1/2*nums_sum即可 这个问题就转化为一个0/1背包问题
+        #0/1背包中状态的定义是这样的 dp[i][k]=max_v 即 在前i个元素中选择 当总权数为k时的最大价值v ，我们在这个问题中 需要稍微的修改一下dp[i][k]=True/False 这表示 在前i个元素中选择 和为k 是否能成立
+        #transfer:dp[i][k] = dp[i-1][k-nums[i]] (k-nums[i]>=0) or dp[i-1][k] || dp[i-1][k](k-num[i]<0)
+        nums_len = len(nums)
+        if not nums_len:
+            return False
+        if nums_len==1:
+            return False
+        nums_sum = sum(nums)
+        if nums_sum%2==1:
+            return False
+        
+        dp = [[False for _ in range(nums_sum//2+1)] for _ in range(nums_len)] # pad
+        dp[0][0]=True
+        for i in range(1,nums_len):
+            for k in range(0,nums_sum//2+1):
+                if k==0:
+                    dp[i][k]=True
+                    continue
+                else:
+                    dp[i][k]=dp[i-1][k-nums[i]] or dp[i-1][k] if k-nums[i]>=0 else dp[i-1][k]
+        return dp[nums_len-1][nums_sum//2]
+```
+# 反思 
+时空是最优吗？有没有优化方法？
+我们发现 dp[i][k]只依赖于dp[i-1][k]和dp[i-1][k-nums[i]]也就是上一行左边的某个数
+考虑使用滚动数组把空间进行压缩 dp[i] 表示上一行能否组成和为i的子数组
+那么这里就需要逆序
+如何理解这个逆序呢？ 这个逆序相当于确保我们最多只使用nums[i]一次 我们先考察了大的 如dp[nums_sum//2] 它更新了 由状态转移我们知道dp[i][k] = dp[i-1][k-nums[i]] (k-nums[i]>=0) or dp[i-1][k] 可知 dp[i][k]只会被dp[i-1][k`] k`<k 的给影响，那么大的更新了，从后往前的话 前面的还是取到了滚动数组中表示上一行的最优解，和这一行的选择还没有关系，这就是为什么说相当于确保 nums[i]最多被用一次。
+然而在完全背包问题中 我们选择正序的去遍历滚动数组 是因为 每个物品就是可以被使用多次 我们希望这次的选择可以多次执行 例如我先更新了前面的最优解 后面又可以利用到这个最优解 相当于后面是在进行过一次当前轮次的操作得到的最优解上再次选择 这就非常巧妙地使得同一个物品可以被多次选择了
+# 优化
+```
+class Solution:
+    def canPartition(self, nums: List[int]) -> bool:
+        #首先可以把整个数组的和求出来nums_sum 我们想，俩个数组的和相等 也就是说每一个的和是整个数组总和的一半 那就只用考察能否选择一个子数组使得他里面所有元素的和是1/2*nums_sum即可 这个问题就转化为一个0/1背包问题
+        #0/1背包中状态的定义是这样的 dp[i][k]=max_v 即 在前i个元素中选择 当总权数为k时的最大价值v ，我们在这个问题中 需要稍微的修改一下dp[i][k]=True/False 这表示 在前i个元素中选择 和为k 是否能成立
+        #transfer:dp[i][k] = dp[i-1][k-nums[i]] k-nums[i]>=0
+        #考虑使用滚动数组把空间进行压缩 dp[i] 表示上一行能否组成和为i的子数组,那么这里就需要逆序
+        nums_len = len(nums)
+        if not nums_len:
+            return False
+        if nums_len==1:
+            return False
+        nums_sum = sum(nums)
+        if nums_sum%2==1:
+            return False
+        
+        dp = [False for _ in range(nums_sum//2+1)] # pad
+        dp[0]=True
+        for i in range(1,nums_len):
+            for k in range(nums_sum//2,-1,-1):
+                if k==0:
+                    dp[k]=True
+                    continue
+                else:
+                    dp[k]=dp[k-nums[i]] or dp[k] if k-nums[i]>=0 else dp[k]
+        return dp[nums_sum//2]
+```
+# 再优化
+
+由于我们发现 数据的范围非常小 sum最多也就2e4 直接开一个大的二进制数来存所有情况就好了
+二进制位数为sum+1 表示 0-sum的可能情况 1表是那位代表的数字可以组成 0表示不能
+对于每个数字 只有两种情况 选或者是不选 选它就使得前面所有和(包括0))的可能情况都加上它 不选没影响
+ 都加可以用位运算的左移表示位置的变化,没影响我们得把上次的所有可能情况也拿进来,用或运算符
+最后只要看sum//2对应的位上是不是1就可以了,这是由二进制数的定义决定的
+求和可以放入循环中 因为和在最后才用到
+```
+class Solution:
+    def canPartition(self, nums: List[int]) -> bool:
+        nums_len = len(nums)
+        bitmap = 1
+        s = 0
+        for i in range(nums_len):
+            s+=nums[i]
+            bitmap |=bitmap<<nums[i]
+        if s&1:
+            return False
+        return 1<<(s//2)&bitmap!=0 # 只要最高位是个1就不会等于0
+```
+# 结果 也就图一乐
+![image.png](https://upload-images.jianshu.io/upload_images/20425476-f47edeb9f0c73952.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
