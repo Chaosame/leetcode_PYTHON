@@ -1,0 +1,71 @@
+![image.png](https://upload-images.jianshu.io/upload_images/20425476-7a8c4bd7b0086f6c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+# 思考
+由于数组和不超过1000，考虑到k有可能是负数，统计加上1000防止值为负导致越界
+但是这样仍然可能越界 需要再处理边界
+      D:dp[i][k]=n 表示包括nums[i]能组成和为k的种数为n 得把和求出来 
+      T:dp[i][k] = dp[i-1][k-nums[i]] + dp[i-1][k+nums[i]]
+      B: 只有第一个元素时      dp[0][1000-nums[0]] +=1   dp[0][1000+nums[0]] +=1
+      
+# 实现
+```
+class Solution:
+    def findTargetSumWays(self, nums: List[int], S: int) -> int:
+       
+        if not nums:
+            return 0
+        nums_len = len(nums)
+        nums_sum = sum(nums)
+        if S>nums_sum or S<-nums_sum or (S+nums_sum)%2!=0:
+            return 0
+        dp = [[0]*(2*1000+1) for _ in range(nums_len)] 
+        dp[0][1000-nums[0]] +=1
+        dp[0][1000+nums[0]] +=1
+        for i in range(1,nums_len):
+            for j in range(-nums_sum,nums_sum+1):
+                p = dp[i-1][j+nums[i]+1000] if j+nums[i]+1000<2*1000+1 else 0
+                n = dp[i-1][j-nums[i]+1000] if j-nums[i]+1000>=0 else 0
+                dp[i][j+1000]=n+p
+        return dp[nums_len-1][S+1000]
+```
+# 反思
+由于dp[i][k]只依赖上一个状态，可以考虑用一维的滚动数组进行状态压缩，我们发现 dp和上一行的左右俩边都可能有关系 无论正向还是逆向遍历，都会导致nums[i]重复产生影响，我们可以用一个临时数组来保持当前i的计算结果，i全部计算完成再更新掉原来的dp
+# 实现
+```
+class Solution:
+    def findTargetSumWays(self, nums: List[int], S: int) -> int:
+        if not nums:
+            return 0
+        nums_len = len(nums)
+        nums_sum = sum(nums)
+        if S>nums_sum or S<-nums_sum or (S+nums_sum)%2!=0:
+            return 0
+        dp = [0]*(2*nums_sum+1) # 表示-sum到sum
+        dp[nums_sum-nums[0]] +=1 # 注意初始是0 时的情况 这里得用加法进行更新
+        dp[nums_sum+nums[0]] +=1
+        for i in range(1,nums_len):
+            next_ = [0]*(2*nums_sum+1)
+            for j in range(-nums_sum,nums_sum+1):
+                p = dp[j+nums[i]+nums_sum] if 0<=j+nums[i]+nums_sum<2*nums_sum+1 else 0
+                n = dp[j-nums[i]+nums_sum] if 0<=j-nums[i]+nums_sum<2*nums_sum+1 else 0
+                next_[j+nums_sum]=n+p
+            dp=next_
+        return dp[S+nums_sum]
+```
+# 再优化 
+由于加法具有交换律，我们可以把加正号得数放在一起构成一个子集 P ，加负号的放在一起构成子集N，问题就变成了分割成俩分子集使得P-N=target 
+我们知道 P+N=sum(nums) 两式相加 2P = target+sum(nums)  问题就变成了求 和为 (target+sum(nums))/2的一个子集有多少个 这是一个典型的0-1背包问题
+剪枝 由公式可知 target+sum(nums)得是偶数
+还可以运用0-1背包的空间优化法
+# 实现
+```
+class Solution:
+    def findTargetSumWays(self, nums: List[int], S: int) -> int:
+        if sum(nums) < S or (sum(nums) + S) % 2 == 1: return 0
+        P = (sum(nums) + S) // 2
+        dp = [1] + [0 for _ in range(P)] # 和为0的子集说明什么都不选
+        for i in range(len(nums)):
+            for j in range(P,-1,-1):
+                dp[j] = dp[j]+dp[j-nums[i]] if j-nums[i]>=0 else dp[j] # 0-1背包 j代表容量 dp[j]=k 代表容量为j时的拿法有k种
+        return dp[P]
+```
