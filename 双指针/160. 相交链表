@@ -1,0 +1,51 @@
+![image.png](https://upload-images.jianshu.io/upload_images/20425476-96d42615b44d3b83.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+# 思路
+双指针 想办法使得尾部对齐，然后就可以同步往后 如果出现俩个节点一致就是交点 如果最后都到了空 说明没交点
+# 实现
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def getIntersectionNode(self, headA: ListNode, headB: ListNode) -> ListNode:
+        A,B = headA,headB
+        a_len,b_len=0,0
+        while(A):
+            A=A.next
+            a_len+=1
+        while(B):
+            B=B.next
+            b_len+=1
+        diff = abs(a_len-b_len)
+        for i in range(diff):
+            headA=headA.next if a_len>b_len else headA
+            headB=headB.next if b_len>a_len else headB
+        while(headA and headB): # 对齐完第一个节点可能就相交了
+            if headA==headB:
+                return headA
+            headA=headA.next
+            headB=headB.next
+        return None
+```
+# 优化
+能不能不去遍历两遍链表，而是在同一个循环中解决问题呢？
+可以！ 当指针跑到末尾之后时，我们让它等于另一个链表的头，为什么这是可行的？因为当一个指针走到末尾时，说明这个指针走过了这整个链表的长度,我们考虑原来走长链的指针，它到末尾时，短指针肯定已经重定位过了，此时短指针也走了长链表的长度，然后长指针被定位到短链表上,此时，恰好形成末尾对齐的情况，直接遍历即可，遇到相等的节点返回就好了。
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def getIntersectionNode(self, headA: ListNode, headB: ListNode) -> ListNode:
+        A,B=headA,headB
+        while(A!=B):
+            A=A.next if A else headB
+            B=B.next if B else headA
+        return A
+``` 

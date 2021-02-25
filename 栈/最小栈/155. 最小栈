@@ -1,0 +1,78 @@
+![image.png](https://upload-images.jianshu.io/upload_images/20425476-ae22de98fca7b17c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+# 思路
+用俩个栈 一个存数 一个存对应位置的最小值
+# 实现
+```
+class MinStack:
+
+    def __init__(self):
+        """
+        initialize your data structure here.
+        """
+        self.stack = [] # 用数组去实现栈
+        self.help_stack = [float('Inf')] # 用一个辅助栈去保存对应栈中每个位置时的最小值
+        return
+
+
+
+    def push(self, x: int) -> None:
+        self.stack.append(x)
+        if x<self.help_stack[-1]:
+            self.help_stack.append(x)
+        else:
+            self.help_stack.append(self.help_stack[-1])
+        return
+
+
+    def pop(self) -> None:
+        self.stack.pop()
+        self.help_stack.pop()
+        return
+        
+
+
+    def top(self) -> int:
+        return self.stack[-1]
+
+
+    def getMin(self) -> int:
+        return self.help_stack[-1]
+
+
+```
+# 优化
+由于每个数和对应位置的最小值是一一对应的关系， 那么我们只用一个数组，存由他们构成的元组即可
+```
+class MinStack:
+
+    def __init__(self):
+        """
+        initialize your data structure here.
+        """
+        self.stack = [] # 用数组去实现栈 存(元素,对应最小值)
+        return
+
+
+
+    def push(self, x: int) -> None:
+        if not self.stack:
+            self.stack.append((x,x))
+        else:
+            self.stack.append((x,min(x,self.stack[-1][1])))
+        return
+
+
+    def pop(self) -> None:
+        self.stack.pop()
+        return
+        
+
+
+    def top(self) -> int:
+        return self.stack[-1][0]
+
+
+    def getMin(self) -> int:
+        return self.stack[-1][1]
+
+```

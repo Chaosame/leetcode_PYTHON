@@ -1,0 +1,32 @@
+![image.png](https://upload-images.jianshu.io/upload_images/20425476-fe2e4b09e31afd61.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+# 思路
+简单的双指针问题,在于考虑各种情况对最后留下来的一段的处理
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def mergeTwoLists(self, l1: ListNode, l2: ListNode) -> ListNode:
+        # 双指针 指向俩不同数组 每次比较指针看谁先进新数组即可直到所有的都进入
+        if not l1 or not l2:
+            return l1 if not l2 else l2
+        ans = ListNode(min(l1.val,l2.val))
+        ans_next = ans
+        i,j = l1,l2# 双指针
+        if i.val<=j.val:
+            i = i.next
+        else:
+            j = j.next
+        while(i and j):
+            if i.val<=j.val:
+                ans_next.next = i if i.val<=j.val else j
+                i = i.next
+            else:
+                ans_next.next = j
+                j = j.next
+            ans_next=ans_next.next
+        # 当一边长度用完时 
+        ans_next.next = i if i else j
+        return ans

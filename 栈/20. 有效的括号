@@ -1,0 +1,26 @@
+![image.png](https://upload-images.jianshu.io/upload_images/20425476-12b9c115f6947319.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+# 思路
+这题主要是找到括号匹配的规律和选取栈来实现对括号匹配规律的校验，遇到左括号直接入栈,遇到右括号就要求栈顶必须匹配上，不然就会出现俩个匹配的括号中夹着一个其他种类的左括号(不会是右括号因为这样之前就非法了).遍历完整个串后,所有括号都应该被匹配完,也就是栈是空的。
+# 实现
+```
+class Solution:
+    def isValid(self, s: str) -> bool:
+        # 任何位置左括号数都得大于等于右括号数 末尾时左等于右 本题不能投机 因为括号的种类不同
+        # 应该使用栈
+        stack = [] # stack
+        symbol_map ={
+            ')':'(',
+            ']':'[',
+            '}':'{'
+        }
+        for i in range(len(s)):
+            if s[i] not in symbol_map:
+                stack.append(s[i]) # 左括号统一加入
+            else:  # 碰到右括号 栈顶必须和它匹配 匹配上了pop出来 同时也必须有栈顶
+                if not stack or stack[-1]!=symbol_map[s[i]]:
+                    return False
+                stack.pop() # 配上了 pop掉
+        
+        return  len(stack)==0
+
+```
