@@ -1,0 +1,24 @@
+![image.png](https://upload-images.jianshu.io/upload_images/20425476-a43d783e16e9c06e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+# 思路
+注意断链就可以了
+# 实现
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def reverseList(self, head: ListNode) -> ListNode:
+        # 头插法 遇到一个插到新链表的头部
+        head_rev = None # 新链表的头节点
+        cur = head # 记录到了哪个位置
+        while(cur):
+            next = cur.next
+            cur.next = head_rev
+            head_rev = cur
+            cur = next
+        return head_rev
+
+```

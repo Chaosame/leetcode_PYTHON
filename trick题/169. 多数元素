@@ -1,0 +1,19 @@
+![image.png](https://upload-images.jianshu.io/upload_images/20425476-5c1bf7798d81d1e3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+# 思路
+简单的思路是直接丢进dict里计数
+再就是分治成俩个子问题分别求众数，俩边众数相等说明它就是众数，否则我们得统计俩边众数出现得次数，于是有 T(n)=2T(n/2)+2n 最后时间复杂度为O(nlogn)空间O(logn)(递归深度)
+
+ 要想空间为O(1)得使用选票算法，由于众数比总数的一半要多，遇到众数加一，遇到非众数减一，结果是大于0的，同时，记录下当前的数字是多少，当计数变为0且遇到新数字时把记录数字换成新数字，这样一轮下来，最后的数会是众数，因为在0时发生交换，导致0的是非众数，最后一定会出现众数多从而非众数无法把count变为0的情况，也就没法更换众数了
+# 实现
+```
+class Solution:
+    def majorityElement(self, nums: List[int]) -> int:
+        candidate =[0,0]
+        for item in nums:
+            if candidate[1]==0:
+                candidate[0] = item
+                candidate[1] = 0
+
+            candidate[1]+=(1 if candidate[0]==item else -1)
+        return candidate[0]
+```
