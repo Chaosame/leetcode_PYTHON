@@ -1,0 +1,16 @@
+![image.png](https://upload-images.jianshu.io/upload_images/20425476-1360e81d8a6ec7b1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+# 思路
+找不同的用异或 相同为0 不同为1 最后统计一下1的个数
+# 实现
+```
+class Solution:
+    def hammingDistance(self, x: int, y: int) -> int:
+        xor=x^y
+        dis=0
+        while(xor):
+            if xor&1==1:
+                dis+=1
+            xor=xor>>1
+        return dis
+```
