@@ -1,0 +1,40 @@
+![image.png](https://upload-images.jianshu.io/upload_images/20425476-7ce8f08150034be5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+# 思路
+1.要空间为O(1),就得把链表得前半或者后半反转过来 可以考虑快慢指针 快指针到末尾时 慢指针刚好到中间 假设快慢都从0开始跳 这里得考虑一下链表长度得奇偶性 假设链表长2n 最大序号是2n-1 那么慢在n 快在2n 且此时的快是空, 假设链表长为2n+1为奇数 最大序号是2n 快在2n 慢在n 恰好在中间的位置得跳过去一个 快此不是空 那么我们根据快的情况就可以确定奇偶性了同时确定慢需不需要跳 ,在慢走的过程中我们去反转前半的链表 最后验证回文得过程就是一个从头开始 一个从慢开始一直比较即可
+2.题解大部分给出了断链的写法 这里给出不断链的写法 注意head在被反转后 永远会是反转链表的最后一个 每次slow更新之后其实是指向了cur的下个节点 那么我们先把head.next 接上 slow 就可以保证整条链不断
+3.但是整体来看断不断链差不多 唯一差在还原原来的链表 我们在判断回文的同时可以去 恢复整条链，断链也可以做到但是最后一步得把俩条链接上
+4.这题情况特殊 一般我们用一个数组把整条链记下来就可以轻松解决了 这种就地反转用于巩固链表操作
+# 实现
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def isPalindrome(self, head: ListNode) -> bool:
+        fast = head
+        slow = head
+        pre= head # pre是整个链表的头
+        while(fast and fast.next): # fast得有 fast下个也得有
+            # 不接上整段链没有任何关系 相当于慢每走一步就把那个加入反转链表
+            fast = fast.next.next
+            cur = slow
+            slow = slow.next
+            if cur==pre:
+                continue
+            else:
+                head.next = slow # slow 是cur后面的不断链 head永远是反转链表的最后一个
+                cur.next = pre
+                pre = cur
+        slow = slow.next if fast else slow
+
+        while(slow and pre):
+            if slow.val!=pre.val:
+                return False
+            slow=slow.next
+            pre=pre.next
+        return True
+
+```
