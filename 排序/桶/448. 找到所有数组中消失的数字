@@ -1,0 +1,18 @@
+![image.png](https://upload-images.jianshu.io/upload_images/20425476-5dda6eff27c75cad.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+# 思路
+ 桶排思想 创建一个长度为n得数组bin 把对应的元素ai放在bin[ai-1]上 他是几就放在对应的位置上 这样就是自然有序的 桶排中唯一的限制是桶的大小 题目中nums长度和数据的范围是一致的 那么我可以对nums就地进行桶排序 采用交换的方式进行 如果ai和它的对应位置上的数不相等 就交换 否则不动 这样如果数组中出现过一个ai 那么ai-1的位置上一定是正确的 反之则没出现过ai
+# 实现
+```
+class Solution:
+    def findDisappearedNumbers(self, nums: List[int]) -> List[int]:
+        ans = []
+        for i in range(len(nums)):
+            while(nums[i]!=i+1 and nums[nums[i]-1]!=nums[i]):
+                nums[nums[i]-1],nums[i]=nums[i],nums[nums[i]-1]
+                
+        for i in range(len(nums)):
+            if nums[i]!=i+1:
+                ans.append(i+1)
+        return ans
+```
