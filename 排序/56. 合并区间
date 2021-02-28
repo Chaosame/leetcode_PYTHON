@@ -1,0 +1,47 @@
+# 思路
+先排序，然后能合并得就合并
+# 实现
+```
+class Solution:
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+        if len(intervals)<=1:
+            return intervals
+        # 先排序再合并
+        intervals = sorted(intervals,key=lambda x:x[0]) #按照区间头部进行排序 合并得双指针
+        ans = [intervals[0]]
+        def merge_interval(inter1,inter2):
+            start1,end1 = inter1[0],inter1[1]
+            start2,end2 = inter2[0],inter2[1]
+            if end1<start2:
+                return [inter1,inter2]
+            res_start = min(start1,start2)
+            res_end = max(end1,end2)
+            return [[res_start,res_end]]
+        
+        for i in range(1,len(intervals)):
+            last = ans.pop()
+            ans.extend(merge_interval(last,intervals[i]))
+        return ans
+```
+# 优化
+我们注意到我们一致关注的是由合并产生的区间（1个或者2个区间中最后一个区间的区间端点）那么我们只需要记录这个两个端点即可
+```
+class Solution:
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+        if len(intervals)<=1:
+            return intervals
+        # 先排序再合并
+        intervals = sorted(intervals,key=lambda x:x[0]) #按照区间头部进行排序 合并得双指针
+        ans=[]
+        i,j= intervals[0][0],intervals[0][1]
+        for index in range(1,len(intervals)):
+            if intervals[index][0]<=j:
+                j=max(intervals[index][1],j)
+            else:
+                print(i,j)
+                ans.append([i,j])
+                i,j =intervals[index][0],intervals[index][1]
+        # 这样做完最后一个区间还没有被加入结果
+        ans.append([i,j])
+        return ans
+```
