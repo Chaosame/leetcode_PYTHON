@@ -1,0 +1,56 @@
+# 实现
+借助快排思想，分治，相当于中间都是1，1的左边是0，右边是2即可.
+这样是快速排序的时间复杂度O(nlogn) 
+```
+class Solution:
+    def sortColors(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        # 快排
+        def quick_sort(nums,left,right):
+            if left>right:
+                return 
+            i,j =left,right
+            pivot =nums[left]
+            while(i<j): # 两个指针没有相遇之前都需要
+                while(i<j and nums[j]>=pivot): # j的while在前否则会导致把大的换到前面去
+                    j-=1
+                while(i<j and nums[i]<=pivot):
+                    i+=1
+                if i<j:
+                    nums[i],nums[j]=nums[j],nums[i]
+            nums[i],nums[left]=nums[left],nums[i] # 这个就是元素的最终位置
+            quick_sort(nums,left,i-1)
+            quick_sort(nums,i+1,right)
+            return nums
+        return quick_sort(nums,0,len(nums)-1)
+```
+# 优化
+但是由于只出现过3种数字 相同数字之间没有差异 我们无脑把0换到左边 2换到右边即可
+我们可以把区间分为3部分 
+[0,zero) 是全是0 [zero,i)是全是1 [two,len-1]全是2
+显然当i==two时，我们的解覆盖了整个区间为正确解，这就是循环的出口
+时间复杂度O(n)
+```
+class Solution:
+    def sortColors(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        # 快排
+        nums_len=len(nums)
+        zero,two=0,nums_len # 俩个区间分割点 zero是左边最后一个0的下标 two是右边第一个2的下标 初始应该保证三个区间都是空的 因为我们要搜索整个空间
+        i = 0 # 记录遍历到哪个位置了
+        while(i<two): # 循环终止的条件是i=two，解覆盖整个区间
+            if(nums[i]==0): # 是0放在左边 zero是左边最后一个0的下标
+                nums[i],nums[zero]=nums[zero],nums[i]
+                i+=1
+                zero+=1
+            elif(nums[i]==1):
+                i+=1
+            elif(nums[i]==2): # two是右边第一个2的下标
+                two-=1
+                nums[two],nums[i]=nums[i],nums[two]
+        
+```
