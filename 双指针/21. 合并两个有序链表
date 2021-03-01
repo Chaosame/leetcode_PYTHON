@@ -2,11 +2,13 @@
 
 # 思路
 简单的双指针问题,在于考虑各种情况对最后留下来的一段的处理
+```
 # Definition for singly-linked list.
 # class ListNode:
 #     def __init__(self, val=0, next=None):
 #         self.val = val
 #         self.next = next
+
 class Solution:
     def mergeTwoLists(self, l1: ListNode, l2: ListNode) -> ListNode:
         # 双指针 指向俩不同数组 每次比较指针看谁先进新数组即可直到所有的都进入
@@ -21,7 +23,7 @@ class Solution:
             j = j.next
         while(i and j):
             if i.val<=j.val:
-                ans_next.next = i if i.val<=j.val else j
+                ans_next.next = i
                 i = i.next
             else:
                 ans_next.next = j
@@ -30,3 +32,4 @@ class Solution:
         # 当一边长度用完时 
         ans_next.next = i if i else j
         return ans
+```

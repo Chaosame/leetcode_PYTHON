@@ -1,0 +1,11 @@
+![image.png](https://upload-images.jianshu.io/upload_images/20425476-bed9fa942d0f1fa3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+# 思路
+初步思路是长度不等返回长的，长度相等找到从头开始的第一个不相等的下标，从最后开始找到第一个不相等的下标，然后用他们的长度减去这两个下标的最小值，
+但是这种想法是错误的，这个是用来求最长不相同子串的，题目要求的是子序列，不需要连续，其中有一个字母另一个没有就是
+那么如果a和b不相等，就应该返回最长的那个
+# 实现
+```
+class Solution:
+    def findLUSlength(self, a: str, b: str) -> int:
+        return max(len(a),len(b)) if a!=b else -1     
+```

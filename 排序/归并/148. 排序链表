@@ -1,0 +1,65 @@
+[图片上传中...(image.png-19abb2-1614579611945-0)]
+# 思路
+对于链表且时间复杂度要求为O(nlogn)的，且要原地的，必须是交换算法了，满足的只有归并排序(快排涉及到多次的节点交换,需要多次变动前驱节点,而且没法在O(1)时间内找到对应下标的元素因此不行
+归并排序 二分求解 子区间 合并可以使用21.合并俩个有序链表的思想，时间复杂度为O(n),那么递推式为T(n)=T(n/2)+O(n) 时间复杂度为O(nlogn) 满足 
+但是归并排序有自顶向下和自底向上俩种写法,对于自顶向下需要进行递归,递归会导致一个递归栈O(logn)，不符合题目对于常数级别的要求
+只能是自底向上，我们多次去控制子区间的划分
+# 实现
+这里先给出容易想到的自顶向下的实现
+```
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def sortList(self, head: ListNode) -> ListNode:
+        # 递归 二分 归并排序
+        # 双指针找到中点的前个节点
+        if not head or not head.next: #递归出口 如果只有一个链节点就出去
+            return head
+        slow = head 
+        fast = head.next
+        while(fast and fast.next):
+            slow = slow.next
+            fast = fast.next.next
+        # 出来就是slow指向链表中点的前一个节点 从这个分开两个链
+        h1 = head # 第一个链的头
+        h2 = slow.next # 第二个链的头
+        slow.next = None # 把链断开
+
+
+
+        # 对两个链表进行合并 依旧是双指针
+        def merge(list1,list2):
+            head = ListNode(0)
+            head.next = list1
+            cur1= list1
+            cur2= list2 # 双指针
+            pre1= head # 存指针1之前的
+            while(cur1 and cur2): # 直到一个为空 就地合并 这里把第一个链表作为返回后的结果
+                while(cur1 and cur1.val<=cur2.val): # 第一个链的节点小 一直后推到第一个大于的节点
+                    pre1 = cur1 # 由于cur2被插在cur1后 pre1更新为cur2 在cur2没变之前
+                    cur1 = cur1.next
+                if(cur1): # 此时cur1大于cur2 要把cur2插到cur1前面 并更新pre1 = cur2 cur1不能动 因为不准确他与下一个的大小
+                    next1 = cur1.next # 保存指针之后的防止断链
+                    next2 = cur2.next
+                    pre1.next = cur2 # 这种情况实际上不会断链
+                    cur2.next = cur1
+                    pre1 = cur2 # 此时最后变为cur2
+                    cur2 = next2
+            if not cur2: # 说明cur2到头了 直接返回list1
+                return head.next
+            elif not cur1: # cur1到头了我们得把cur2 接到最后面 此时的cur1是none 应该接到pre1后面
+                pre1.next = cur2
+                return head.next
+        
+        h1=self.sortList(h1)
+        h2=self.sortList(h2)
+        res = merge(h1,h2)
+        return res
+```
+
+
+
+
