@@ -1,0 +1,80 @@
+![image.png](https://upload-images.jianshu.io/upload_images/20425476-ce7cb635f897c9d5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+#　思路
+这题主要是一个括号匹配和数字匹配的问题，括号匹配用于锁定需要变为多倍的字符串，数字匹配则需要把连续的数字当作一整个数字来看待，因此我们选定栈为数据结构
+＃ 实现
+```
+class Solution:
+    def decodeString(self, s: str) -> str:
+         # 用队列来实现比较好 因为输入的字串总是有效的
+         # 遇到数字直接 用一个临时变量保存 遇到左括号入栈 直到遇到右括号之前把所有的字符入栈 遇到右括号全部pop出来直到遇到一个左括号 并且pop一个num 把字符串复制k倍再放进栈
+         # 处理嵌套
+         if not s:
+             return ''
+         str_len  =  len (s)
+         stack = [] # 辅助栈
+         res = ''  
+         for i in range(str_len):
+             if s[i].isdigit():
+                 stack.append(s[i])     
+             elif s[i]=='[': 
+                 stack.append('[')
+             elif s[i]==']':
+                 char_ = '' # 用于储存需要倍增的字符
+                 while(stack): # 栈不空一直pop
+                    char = stack.pop()
+                    if (char != '['):
+                        char_+=char[::-1] #因为使用了栈pop导致字符串的顺序反了，先需要局部翻转
+                    else: # 遇到[
+                        char_ = char_[::-1] #确定了字符串范围后再整体翻转
+                        break
+                 # 再去找数字
+                 num_=''
+                 while(stack and stack[-1].isdigit()):
+                    num_+=stack.pop()
+                 num_ = num_[::-1] if num_ else '1'
+                 res_char = char_*int(num_)
+                 stack.append(res_char)
+             else: # 都不是只能是字母了
+                 stack.append(s[i])
+         return stack[0] if len(stack)==1 else ''.join(stack)
+        
+             
+```
+＃优化
+给出一个c++版本 分别用两个栈来储存 次数和现在的字符串 我们倍增去倍增 res ，strs.top()是之前留下的需要处理的字符串 每次倍增我们都去和之前留下的字符串求和
+```
+class Solution {
+public:
+    string decodeString(string s) {
+        string res = "";
+        stack <int> nums;
+        stack <string> strs;
+        int num = 0;
+        int len = s.size();
+        for (int i=0;i<len;++i){
+            if (s[i]>='0' && s[i]<='9'){ // 数字的话需要把之间的数字当作高位 然后把现在得拼到num中
+             num = num*10 +s[i]-'0';
+                }
+            else if((s[i] >= 'a' && s[i] <= 'z') ||(s[i] >= 'A' && s[i] <= 'Z')){ //如果是字母 先拼到目前的res中
+                res =res+  s[i];
+            } 
+            else if(s[i]=='['){ //左括号则把现在的res和num压栈 并且初始化 
+                nums.push(num);
+                num = 0;
+                strs.push(res);
+                res = "";
+            }
+            else{ //右括号则把栈中的数字取出作为次数 res作为需要倍化的字符串 把结果加入str栈中
+                int times= nums.top();
+                nums.pop();
+                for(int j=0;j<times;++j){
+                    strs.top()+=res; // 现在需要倍化字符串是res 处理完成后res变成现在的top
+                }
+                res = strs.top();
+                strs.pop();
+            }
+        }
+        return res;
+    }
+};
+```
